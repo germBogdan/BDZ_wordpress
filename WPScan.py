@@ -100,7 +100,8 @@ def Check_WP_and_search_version (url):
     req = urllib.request.Request(url+"/wp-config.php")
     try:
         htmltext = urlopen(req, timeout=3).read()
-        if htmltext == b'':
+        len_htmltext=len(str(htmltext))
+        if len_htmltext >= 3:
             print("This is wordpress.")
         else:
             print("This is not wordptess.")
