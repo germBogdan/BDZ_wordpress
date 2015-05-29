@@ -143,7 +143,11 @@ def Check_WP_and_search_version (url):
         sys.exit()
 
 def Search_vulnerabilities (version):
-        driver = webdriver.Firefox()
+        try:
+            driver = webdriver.Firefox()
+        except BaseException:
+            print("Browser Firefox not found. Please install it before using this app")
+            sys.exit()
         driver.get("http://www.cvedetails.com/version-search.php")
         try:       
             elem= driver.find_element_by_xpath("//input[@name='product']") 
