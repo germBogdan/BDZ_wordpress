@@ -295,7 +295,7 @@ if(len(version)<3):
     version.append(0)
 #преобразование номера версии в числовой тип   
 version=int(version[0])+int(version[1])/10+int(version[2])/100
-if (version <= 2.83):
+if ((version <= 2.83) and (version > 2.71)):
     y="y"
     n="n"
     while(True):
